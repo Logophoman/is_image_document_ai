@@ -12,39 +12,53 @@ import torch
 from PIL import Image
 import torch.nn.functional as F
 import torch.nn as nn
+from pathlib import Path
 from torchvision import models, transforms
 
 # Import your custom TinyCNN
-from model import TinyCNN  # Make sure model.py is in the same directory or installed as a module
+from .model import TinyCNN  # Make sure model.py is in the same directory or installed as a module
 
-def load_tinycnn(model_path, num_classes=2, device="cpu"):
+def load_tinycnn(model_path=None, num_classes=2, device="cpu"):
     """
-    Load a TinyCNN model and weights from `model_path`.
+    Load a TinyCNN model and weights from the installed package directory.
     """
+    if model_path is None:
+        # Get the directory of the installed package
+        package_dir = Path(__file__).resolve().parent
+        model_path = package_dir / "tinycnn_document_vs_image.pth"
+
     model = TinyCNN(num_classes=num_classes)
     model.to(device)
-    state_dict = torch.load(model_path, map_location=device)
+    state_dict = torch.load(str(model_path), map_location=device)
     model.load_state_dict(state_dict)
     model.eval()
     return model
 
-def load_mobilenet(model_path, num_classes=2, device="cpu"):
+def load_mobilenet(model_path=None, num_classes=2, device="cpu"):
     """
-    Load a MobileNetV2 model and weights from `model_path`.
+    Load a MobileNetV2 model and weights from the installed package directory.
     """
+    if model_path is None:
+        package_dir = Path(__file__).resolve().parent
+        model_path = package_dir / "mobilenet_document_vs_image.pth"
+
     model = models.mobilenet_v2(weights=models.MobileNet_V2_Weights.IMAGENET1K_V2)
     in_features = model.classifier[1].in_features
     model.classifier[1] = nn.Linear(in_features, num_classes)
     model.to(device)
-    state_dict = torch.load(model_path, map_location=device)
+    state_dict = torch.load(str(model_path), map_location=device)
     model.load_state_dict(state_dict)
     model.eval()
     return model
 
-def predict_image(model, image_path, device="cpu"):
+def predict_image(image_path, model = None, device="cpu"):
     """
     Predicts if `image_path` is 'document' or 'image' using the given model.
     """
+
+    if model is None:
+        model = load_mobilenet()
+
     # Same transforms as training (excluding random flips)
     preprocess = transforms.Compose([
         transforms.Resize((224, 224)),
@@ -63,20 +77,28 @@ def predict_image(model, image_path, device="cpu"):
     # If subfolders were named alphabetically => 'document'=0, 'image'=1
     return "document" if pred.item() == 0 else "image"
 
-def infer_single_image(model, image_path, device="cpu"):
+def infer_single_image(image_path, model = None,  device="cpu"):
     """
     Classify a single image file.
     """
+    if model is None:
+        model = load_mobilenet()
+    
     if not os.path.isfile(image_path):
         print(f"Error: '{image_path}' is not a file.")
         return
-    label = predict_image(model, image_path, device=device)
+    label = predict_image(image_path, model=model, device=device)
     print(f"{image_path} => {label}")
+    return label
 
-def infer_folder(model, folder_path, device="cpu"):
+def infer_folder(folder_path, model = None, device="cpu"):
     """
     Classify all images in a folder.
     """
+
+    if model is None:
+        model = load_mobilenet()
+    
     if not os.path.isdir(folder_path):
         print(f"Error: '{folder_path}' is not a directory.")
         return
@@ -86,10 +108,14 @@ def infer_folder(model, folder_path, device="cpu"):
         print(f"No images found in '{folder_path}'.")
         return
 
+    labels = [] 
+
     for f in files:
         image_path = os.path.join(folder_path, f)
-        label = predict_image(model, image_path, device=device)
+        label = predict_image(image_path, model=model, device=device)
         print(f"{f} => {label}")
+        labels.append(label)
+    return labels
 
 def test_with_dataloader(model, root_dir="images", batch_size=32, device="cpu"):
     """

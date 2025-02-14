@@ -6,7 +6,7 @@ from PIL import Image
 import torch.nn as nn
 from torchvision import transforms
 
-from model import TinyCNN  # your custom CNN
+from .model import TinyCNN
 
 def load_model(model_path="tinycnn_document_vs_image.pth", num_classes=2):
     """

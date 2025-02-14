@@ -3,9 +3,8 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-
-from data_loader import get_data_loaders
-from model import TinyCNN  # Import your custom model here
+from torchvision import models
+from .data_loader import get_data_loaders
 
 def train_model(
     root_dir="images",
@@ -15,6 +14,7 @@ def train_model(
     learning_rate=1e-3
 ):
     # 1. Get data loaders (3-way split)
+    #    Suppose you do 80% train, 10% val, 10% test
     train_loader, val_loader, test_loader = get_data_loaders(
         root_dir=root_dir,
         batch_size=batch_size,
@@ -23,18 +23,22 @@ def train_model(
         test_ratio=0.1
     )
     
-    # 2. Initialize your TinyCNN instead of MobileNet
-    model = TinyCNN(num_classes=num_classes)
+    # 2. Load a pretrained MobileNet
+    model = models.mobilenet_v2(weights=models.MobileNet_V2_Weights.IMAGENET1K_V2)
     
-    # 3. Move model to CPU/GPU
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # 3. Replace the classifier layer for 2 classes
+    in_features = model.classifier[1].in_features
+    model.classifier[1] = nn.Linear(in_features, num_classes)
+    
+    # 4. Move to CPU or GPU
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model.to(device)
     
-    # 4. Define loss & optimizer
+    # 5. Define loss/optimizer
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     
-    # 5. Training loop
+    # 6. Training loop
     for epoch in range(num_epochs):
         model.train()
         running_loss = 0.0
@@ -69,19 +73,18 @@ def train_model(
         val_acc = 100.0 * val_correct / val_total
         print(f"Epoch [{epoch+1}/{num_epochs}], Loss: {epoch_loss:.4f}, Val Acc: {val_acc:.2f}%")
 
-        # Optional early stopping if val_acc is very high
+        # Optional early stopping
         if val_acc >= 99.0:
             print("Early stopping - high validation accuracy reached.")
             break
 
-    # 6. Save model
-    torch.save(model.state_dict(), "tinycnn_document_vs_image.pth")
-    print("Model saved to tinycnn_document_vs_image.pth")
+    # 7. Save model
+    torch.save(model.state_dict(), "mobilenet_document_vs_image.pth")
+    print("Model saved to mobilenet_document_vs_image.pth")
 
-    # Evaluate on test set
+    # (Optional) Evaluate on test set
     test_correct = 0
     test_total = 0
-    model.eval()
     with torch.no_grad():
         for images, labels in test_loader:
             images = images.to(device)
@@ -90,7 +93,6 @@ def train_model(
             _, preds = torch.max(outputs, 1)
             test_total += labels.size(0)
             test_correct += (preds == labels).sum().item()
-
     test_acc = 100.0 * test_correct / test_total
     print(f"Final Test Accuracy: {test_acc:.2f}%")
 

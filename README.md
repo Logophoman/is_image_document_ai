@@ -112,6 +112,54 @@ Both achieve ~99% accuracy on our dataset, with MobileNetV2 slightly higher (~99
 
 ## Inference
 
+## Using the PyPi package: 
+
+Input Folder:
+
+```python
+from is_image_document_ai import load_tinycnn, infer_folder
+
+model = load_tinycnn()
+result = infer_folder("testfolder", model)
+print(result)
+```
+
+Expected result: 
+
+```
+paper.jpg => document
+image.png => image
+['document', 'image']
+```
+
+Input File:
+
+```python
+from is_image_document_ai import load_mobilenet, infer_single_image
+
+model = load_mobilenet()
+result = infer_single_image("paper.jpg", model)
+print(result)
+```
+
+Expected result: 
+
+```
+paper.jpg => document
+document
+```
+
+Or for the lazy ones (defaults to mobilenet):
+
+```python
+from is_image_document_ai import infer_folder
+
+result = infer_folder("testfolder")
+print(result)
+```
+
+## Manual using the scripts yourself:
+
 We provide multiple ways to run inference. You can:
 
 1. Use the **`test.py`** (for MobileNetV2) or **`tinytest.py`** (for TinyCNN) scripts for quick checks.
