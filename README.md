@@ -5,20 +5,20 @@ A lightweight pipeline for classifying whether an image is a **document** (e.g.,
 1. **MobileNetV2** (pretrained on ImageNet, then fine-tuned)
 2. **TinyCNN** (a small custom CNN)
 
-Both achieve ~99% accuracy on our dataset, with MobileNetV2 slightly higher (~99.8%) and TinyCNN slightly smaller/faster in terms of parameters (~99.2% accuracy).
+Both achieve ~99% accuracy on our dataset, with MobileNetV2 (recommended & default) slightly higher (~99.8%) and TinyCNN slightly faster (~99.2% accuracy).
 
 ## Table of Contents
 
 - [Overview](#overview)
 - [Data](#data)
 - [Installation](#installation)
-- [Training](#training)
-  - [MobileNetV2 Model](#mobilenetv2-model)
-  - [TinyCNN Model](#tinycnn-model)
 - [Inference](#inference)
   - [Single Image](#single-image)
   - [Folder of Images](#folder-of-images)
   - [Test-Set Evaluation (DataLoader)](#test-set-evaluation-dataloader)
+- [Training](#training)
+  - [MobileNetV2 Model](#mobilenetv2-model)
+  - [TinyCNN Model](#tinycnn-model)
 - [Usage Examples](#usage-examples)
 - [Results](#results)
 - [Contributing](#contributing)
@@ -52,9 +52,13 @@ Both achieve ~99% accuracy on our dataset, with MobileNetV2 slightly higher (~99
 - We perform a **3-way random split**: 80% training, 10% validation, 10% test (i.e., `train_ratio=0.8, val_ratio=0.1, test_ratio=0.1`).
 - Each image is resized to **224×224** before feeding into the models.
 
----
-
 ## Installation
+
+## Using the PyPi package:
+
+`pip install is-image-document-ai==0.0.1`
+
+## Using normal python environment:
 
 1. **Clone** this repository:
    ```bash
@@ -74,39 +78,6 @@ Both achieve ~99% accuracy on our dataset, with MobileNetV2 slightly higher (~99
    By default, it streams from the Hugging Face datasets to get 10k `document` images and 10k `image` images, saved into `images/`.
 
    > Note: You will need ~3.8GB of free storage for the image data. Training requires ~4GB of VRAM for mobilenet and ~800MB VRAM for TinyCNN
-
----
-
-## Training
-
-### MobileNetV2 Model
-
-- **File**: [`train.py`](train.py)
-- Command:
-  ```bash
-  python train.py
-  ```
-- This script:
-  1. Loads data from `images/` folder using [`data_loader.py`](data_loader.py).
-  2. Initializes a MobileNetV2 (pretrained on ImageNet).
-  3. Fine-tunes the final layer for 2 classes: **document** vs. **image**.
-  4. Trains until ~99% accuracy or until epochs finish.
-  5. Saves the weights to **`mobilenet_document_vs_image.pth`**.
-  6. Evaluates on the test set (the 10% split).
-
-### TinyCNN Model
-
-- **File**: [`tinytrain.py`](tinytrain.py)
-- Command:
-  ```bash
-  python tinytrain.py
-  ```
-- This script:
-  1. Loads the same `images/` dataset with an 80/10/10 split.
-  2. Initializes our custom **TinyCNN** architecture ([`model.py`](model.py)).
-  3. Trains for up to 5 epochs (or early stops at ~99% val accuracy).
-  4. Saves weights to **`tinycnn_document_vs_image.pth`**.
-  5. Prints final test accuracy.
 
 ---
 
@@ -192,6 +163,39 @@ python inference.py --model-type mobilenet \
                     --root-dir images \
                     --batch-size 32
 ```
+
+---
+
+## Training
+
+### MobileNetV2 Model
+
+- **File**: [`train.py`](train.py)
+- Command:
+  ```bash
+  python train.py
+  ```
+- This script:
+  1. Loads data from `images/` folder using [`data_loader.py`](data_loader.py).
+  2. Initializes a MobileNetV2 (pretrained on ImageNet).
+  3. Fine-tunes the final layer for 2 classes: **document** vs. **image**.
+  4. Trains until ~99% accuracy or until epochs finish.
+  5. Saves the weights to **`mobilenet_document_vs_image.pth`**.
+  6. Evaluates on the test set (the 10% split).
+
+### TinyCNN Model
+
+- **File**: [`tinytrain.py`](tinytrain.py)
+- Command:
+  ```bash
+  python tinytrain.py
+  ```
+- This script:
+  1. Loads the same `images/` dataset with an 80/10/10 split.
+  2. Initializes our custom **TinyCNN** architecture ([`model.py`](model.py)).
+  3. Trains for up to 5 epochs (or early stops at ~99% val accuracy).
+  4. Saves weights to **`tinycnn_document_vs_image.pth`**.
+  5. Prints final test accuracy.
 
 ---
 
