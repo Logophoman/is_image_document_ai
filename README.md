@@ -22,6 +22,14 @@ result = infer_folder("testfolder")
 print(result)
 ```
 
+Expected result: 
+
+```
+paper.jpg => document
+image.png => image
+['document', 'image']
+```
+
 ## Table of Contents
 
 - [Overview](#overview)
