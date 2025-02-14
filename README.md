@@ -7,6 +7,21 @@ A lightweight pipeline for classifying whether an image is a **document** (e.g.,
 
 Both achieve ~99% accuracy on our dataset, with MobileNetV2 (recommended & default) slightly higher (~99.8%) and TinyCNN slightly faster (~99.2% accuracy).
 
+## Quickstart:
+
+Install with: 
+
+`pip install is-image-document-ai==0.0.1`
+
+Classify a folder of images of documents or generic images...
+
+```python
+from is_image_document_ai import infer_folder
+
+result = infer_folder("testfolder")
+print(result)
+```
+
 ## Table of Contents
 
 - [Overview](#overview)
