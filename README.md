@@ -11,7 +11,7 @@ Both achieve ~99% accuracy on our dataset, with MobileNetV2 (recommended & defau
 
 Install with: 
 
-`pip install is-image-document-ai==0.0.1`
+`pip install is-image-document-ai==0.0.2`
 
 Classify a folder of images of documents or generic images...
 

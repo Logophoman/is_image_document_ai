@@ -88,7 +88,7 @@ def infer_single_image(image_path, model = None,  device="cpu"):
         print(f"Error: '{image_path}' is not a file.")
         return
     label = predict_image(image_path, model=model, device=device)
-    print(f"{image_path} => {label}")
+    # print(f"{image_path} => {label}")
     return label
 
 def infer_folder(folder_path, model = None, device="cpu"):
@@ -113,7 +113,7 @@ def infer_folder(folder_path, model = None, device="cpu"):
     for f in files:
         image_path = os.path.join(folder_path, f)
         label = predict_image(image_path, model=model, device=device)
-        print(f"{f} => {label}")
+        # print(f"{f} => {label}")
         labels.append(label)
     return labels
 

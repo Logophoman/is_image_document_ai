@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="is_image_document_ai",
-    version="0.0.1",
+    version="0.0.2",
     author="Andreas Reich",
     author_email="logophoman@gmail.com",
     description="A simple AI package for classifying images as documents or general images.",
